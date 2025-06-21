@@ -24,7 +24,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Build with Maven
+    - name: Build with gradle
       run: ./gradlew clean build -x test
 
     - name: Set up Docker Buildx
