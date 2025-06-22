@@ -40,7 +40,6 @@ jobs:
           fi
 
       - name: Trigger Harness Pipeline
-        working-directory: /app
         run: |
           node cmd.js execute-pipeline \
             --project_id=${{ env.HARNESS_PROJECT_ID }} \
