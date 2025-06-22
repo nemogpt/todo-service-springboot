@@ -39,40 +39,18 @@ jobs:
             echo "RELEASE_TAG=$GITHUB_SHA" >> $GITHUB_ENV
           fi
 
-      - name: Trigger Harness Pipeline
+      - name: Install Harness CLI
         run: |
-          node cmd.js execute-pipeline \
-            --project_id=${{ env.HARNESS_PROJECT_ID }} \
-            --pipeline_id=${{ env.HARNESS_PIPELINE_ID }} \
-            --wait=${{ env.WAIT_FOR_PIPELINE_TO_COMPLETE }} \
-            --api_key=${{ secrets.HARNESS_NG_API_TOKEN }} \
-            --yaml='pipeline:
-              identifier: ${{ env.HARNESS_PIPELINE_ID }}
-              variables:
-                - name: VERSION
-                  value: ${{ env.RELEASE_TAG }}
-                - name: COMMIT_SHA
-                  value: ${{ github.sha }}
-              stages:
-                - stage:
-                    identifier: Deployment
-                    type: Deployment
-                    spec:
-                      service:
-                        serviceRef: ${{ env.SERVICE_ID }}
-                        serviceInputs:
-                          serviceDefinition:
-                            type: Kubernetes
-                            spec:
-                              artifacts:
-                                primary:
-                                  primaryArtifactRef: ${{ env.HARNESS_ARTIFACT_SOURCE_ID }}
-                                  sources:
-                                    - identifier: ${{ env.HARNESS_ARTIFACT_SOURCE_ID }}
-                                      type: DockerRegistry
-                                      spec:
-                                        tag: ${{ env.RELEASE_TAG }}
-                      environment:
-                        environmentRef: ${{ env.ENVIRONMENT_ID }}
-                        infrastructureDefinitions:
-                          - identifier: ${{ env.ENVIRONMENT_ID }}'
+          curl -sL https://raw.githubusercontent.com/harness/harness-cli/main/scripts/install.sh | bash
+          harness version
+
+      - name: Trigger Harness Pipeline
+        env:
+          HARNESS_API_KEY: ${{ secrets.HARNESS_NG_API_TOKEN }}
+        run: |
+          harness pipeline execute \
+            --project-id $HARNESS_PROJECT_ID \
+            --pipeline-id $HARNESS_PIPELINE_ID \
+            --api-key $HARNESS_API_KEY \
+            --input "variables.VERSION=$RELEASE_TAG" \
+            --wait
