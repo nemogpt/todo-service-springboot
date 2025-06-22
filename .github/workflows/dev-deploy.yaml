@@ -16,13 +16,13 @@ env:
   WAIT_FOR_PIPELINE_TO_COMPLETE: true
   DOCKERHUB_USERNAME_REF: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD_REF: ${{ secrets.DOCKERHUB_PASSWORD }}
+  HARNESS_NG_API_TOKEN: ${{ secrets.HARNESS_NG_API_TOKEN }}
+  HARNESS_ACCOUNT_ID: ${{ secrets.HARNESS_ACCOUNT_ID }}
 
 jobs:
-  trigger_harness_pipeline:
+  deploy-to-harness:
     name: Deploy Spring Boot App to DO K8s via Harness
     runs-on: ubuntu-latest
-    env:
-      SPRING_PROFILES_ACTIVE: dev
     environment:
       name: dev
     steps:
@@ -31,7 +31,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.tag }}
 
-      - name: Set tag or SHA
+      - name: Set RELEASE_TAG env variable
         run: |
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             echo "RELEASE_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
@@ -39,18 +39,18 @@ jobs:
             echo "RELEASE_TAG=$GITHUB_SHA" >> $GITHUB_ENV
           fi
 
-      - name: Install Harness CLI
+      - name: Download Harness CLI
         run: |
-          curl -sL https://raw.githubusercontent.com/harness/harness-cli/main/scripts/install.sh | bash
-          harness version
+          curl -LO https://github.com/harness/harness-cli/releases/download/v0.0.25-Preview/harness-v0.0.25-Preview-linux-arm64.tar.gz
+          tar -xvf harness-v0.0.25-Preview-linux-arm64.tar.gz
+          chmod +x harness
+          sudo mv harness /usr/local/bin/
 
       - name: Trigger Harness Pipeline
-        env:
-          HARNESS_API_KEY: ${{ secrets.HARNESS_NG_API_TOKEN }}
         run: |
           harness pipeline execute \
-            --project-id $HARNESS_PROJECT_ID \
-            --pipeline-id $HARNESS_PIPELINE_ID \
-            --api-key $HARNESS_API_KEY \
-            --input "variables.VERSION=$RELEASE_TAG" \
-            --wait
+            --account $HARNESS_ACCOUNT_ID \
+            --project $HARNESS_PROJECT_ID \
+            --pipeline $HARNESS_PIPELINE_ID \
+            --token $HARNESS_NG_API_TOKEN \
+            --input-set-values VERSION=$RELEASE_TAG,COMMIT_SHA=$GITHUB_SHA
