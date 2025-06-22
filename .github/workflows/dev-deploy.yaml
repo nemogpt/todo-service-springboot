@@ -39,10 +39,10 @@ jobs:
             echo "RELEASE_TAG=$GITHUB_SHA" >> $GITHUB_ENV
           fi
 
-      - name: Download Harness CLI
+      - name: Download Harness CLI (x86_64)
         run: |
-          curl -LO https://github.com/harness/harness-cli/releases/download/v0.0.25-Preview/harness-v0.0.25-Preview-linux-arm64.tar.gz
-          tar -xvf harness-v0.0.25-Preview-linux-arm64.tar.gz
+          curl -LO https://github.com/harness/harness-cli/releases/download/v0.0.25-Preview/harness-v0.0.25-Preview-linux-amd64.tar.gz
+          tar -xvf harness-v0.0.25-Preview-linux-amd64.tar.gz
           chmod +x harness
           sudo mv harness /usr/local/bin/
 
