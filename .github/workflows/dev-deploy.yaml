@@ -45,13 +45,14 @@ jobs:
             tar -xvf harness-v0.0.29-linux-amd64.tar.gz
             chmod +x harness
             sudo mv harness /usr/local/bin/
-      
 
       - name: Trigger Harness Pipeline
         run: |
-          harness pipeline execute \
-            --account $HARNESS_ACCOUNT_ID \
-            --project $HARNESS_PROJECT_ID \
-            --pipeline $HARNESS_PIPELINE_ID \
-            --token $HARNESS_NG_API_TOKEN \
-            --input-set-values VERSION=$RELEASE_TAG,COMMIT_SHA=$GITHUB_SHA
+          harness pipeline run \
+            --account-id $HARNESS_ACCOUNT_ID \
+            --org-id $ORG_ID \
+            --project-id $HARNESS_PROJECT_ID \
+            --identifier $HARNESS_PIPELINE_ID \
+            --api-key $HARNESS_NG_API_TOKEN \
+            --inputs VERSION=$RELEASE_TAG,COMMIT_SHA=$GITHUB_SHA \
+            --no-cred-cache
