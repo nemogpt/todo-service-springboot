@@ -18,6 +18,7 @@ env:
   DOCKERHUB_PASSWORD_REF: ${{ secrets.DOCKERHUB_PASSWORD }}
   HARNESS_NG_API_TOKEN: ${{ secrets.HARNESS_NG_API_TOKEN }}
   HARNESS_ACCOUNT_ID: ${{ secrets.HARNESS_ACCOUNT_ID }}
+  ORG_ID: default
 
 jobs:
   deploy-to-harness:
@@ -49,7 +50,7 @@ jobs:
       - name: Trigger Harness Pipeline
         run: |
           harness pipeline run \
-            --account-id ${{ secrets.HARNESS_ACCOUNT_ID }} \
+            --org-id $ORG_ID \
             --project-id $HARNESS_PROJECT_ID \
             --identifier $HARNESS_PIPELINE_ID \
             --api-key $HARNESS_NG_API_TOKEN \
