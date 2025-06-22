@@ -1,0 +1,79 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag that should be deployed. If not provided, the head of the branch specified will be deployed.'
+        required: false
+
+env:
+  SERVICE_ID: todoservicespring
+  HARNESS_PROJECT_ID: default_project
+  HARNESS_ARTIFACT_SOURCE_ID: todospringboot
+  HARNESS_PIPELINE_ID: rolling_deployment_pipeline
+  ENVIRONMENT_ID: dev
+  WAIT_FOR_PIPELINE_TO_COMPLETE: true
+  DOCKERHUB_USERNAME_REF: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_PASSWORD_REF: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+jobs:
+  trigger_harness_pipeline:
+    name: Deploy Spring Boot App to DO K8s via Harness
+    runs-on: ubuntu-latest
+    env:
+      SPRING_PROFILES_ACTIVE: dev
+    environment:
+      name: dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Set tag or SHA
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "RELEASE_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=$GITHUB_SHA" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger Harness Pipeline
+        working-directory: /app
+        run: |
+          node cmd.js execute-pipeline \
+            --project_id=${{ env.HARNESS_PROJECT_ID }} \
+            --pipeline_id=${{ env.HARNESS_PIPELINE_ID }} \
+            --wait=${{ env.WAIT_FOR_PIPELINE_TO_COMPLETE }} \
+            --api_key=${{ secrets.HARNESS_NG_API_TOKEN }} \
+            --yaml='pipeline:
+              identifier: ${{ env.HARNESS_PIPELINE_ID }}
+              variables:
+                - name: VERSION
+                  value: ${{ env.RELEASE_TAG }}
+                - name: COMMIT_SHA
+                  value: ${{ github.sha }}
+              stages:
+                - stage:
+                    identifier: Deployment
+                    type: Deployment
+                    spec:
+                      service:
+                        serviceRef: ${{ env.SERVICE_ID }}
+                        serviceInputs:
+                          serviceDefinition:
+                            type: Kubernetes
+                            spec:
+                              artifacts:
+                                primary:
+                                  primaryArtifactRef: ${{ env.HARNESS_ARTIFACT_SOURCE_ID }}
+                                  sources:
+                                    - identifier: ${{ env.HARNESS_ARTIFACT_SOURCE_ID }}
+                                      type: DockerRegistry
+                                      spec:
+                                        tag: ${{ env.RELEASE_TAG }}
+                      environment:
+                        environmentRef: ${{ env.ENVIRONMENT_ID }}
+                        infrastructureDefinitions:
+                          - identifier: ${{ env.ENVIRONMENT_ID }}'
