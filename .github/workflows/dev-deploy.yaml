@@ -49,8 +49,7 @@ jobs:
       - name: Trigger Harness Pipeline
         run: |
           harness pipeline run \
-            --account-id $HARNESS_ACCOUNT_ID \
-            --org-id $ORG_ID \
+            --account-id ${{ secrets.HARNESS_ACCOUNT_ID }} \
             --project-id $HARNESS_PROJECT_ID \
             --identifier $HARNESS_PIPELINE_ID \
             --api-key $HARNESS_NG_API_TOKEN \
