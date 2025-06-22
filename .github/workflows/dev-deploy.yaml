@@ -52,7 +52,7 @@ jobs:
           harness pipeline run \
             --org-id $ORG_ID \
             --project-id $HARNESS_PROJECT_ID \
-            --identifier $HARNESS_PIPELINE_ID \
+            --pipeline-id $HARNESS_PIPELINE_ID \
             --api-key $HARNESS_NG_API_TOKEN \
             --inputs VERSION=$RELEASE_TAG,COMMIT_SHA=$GITHUB_SHA \
             --no-cred-cache
