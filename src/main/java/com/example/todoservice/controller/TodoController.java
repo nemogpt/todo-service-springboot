@@ -16,7 +16,8 @@ public class TodoController {
         return List.of(
             new Todo( "Learn Spring Boot", false),
             new Todo("Build a REST API", true),
-                new Todo("Deploy to production", false)
+                new Todo("Deploy to production", false),
+                new Todo("Write tests", true)
         );
     }
 }
