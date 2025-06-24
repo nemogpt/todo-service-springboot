@@ -15,7 +15,8 @@ public class TodoController {
         // In a real application, you would fetch the todos from a database or another service.
         return List.of(
             new Todo( "Learn Spring Boot", false),
-            new Todo("Build a REST API", true)
+            new Todo("Build a REST API", true),
+                new Todo("Deploy to production", false)
         );
     }
 }
