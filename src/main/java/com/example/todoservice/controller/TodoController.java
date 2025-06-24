@@ -14,10 +14,11 @@ public class TodoController {
         // This is a placeholder for the actual implementation.
         // In a real application, you would fetch the todos from a database or another service.
         return List.of(
-            new Todo( "Learn Spring Boot", false),
-            new Todo("Build a REST API", true),
+                new Todo( "Learn Spring Boot", false),
+                new Todo("Build a REST API", true),
                 new Todo("Deploy to production", false),
-                new Todo("Write tests", true)
+                new Todo("Write tests", true),
+                new Todo("FPD LECTURE IN jiit",false)
         );
     }
 }
